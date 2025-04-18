@@ -1,2 +1,2 @@
 # homelab
-HomeLab for Docker, K8s, Netweorking
+This Repository Homelab contains all my homelab documentation files. Here you'll find notes, setups, and configurations for infrastructure, applications, networking, and more.
