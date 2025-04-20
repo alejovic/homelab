@@ -67,5 +67,5 @@ Everyone is on the same subnet (like 192.168.1.0/24) → Full communication ✅
 ```
 
 👀 **Implementations**
-  - [Linux Bridge](/linux-bridge.md)
-  - [Libvirt Networking](/libvirt.md)
+  - [Linux Bridge](linux-bridge.md)
+  - [Libvirt Networking](libvirt.md)

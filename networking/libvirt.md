@@ -12,7 +12,7 @@ Why?
 ### 🤓 Libvirt Network
 
 A Libvirt network is a managed network on top of what Linux already provides (including Linux bridges). When you create a network in virsh (or virt-manager), behind the scenes, libvirt usually creates a Linux bridge plus maybe dnsmasq for DHCP, NAT rules for internet access, etc.
-
+![](libvirt.png)
 It's basically an orchestrated or automated network setup.
 
 In fact, virsh net just manages Linux bridges (and extra stuff) for you.
