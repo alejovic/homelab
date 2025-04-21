@@ -103,3 +103,16 @@ minikube start --driver=kvm2 --kvm-network=net-homelan
 minikube ssh
 ip addr show
 ```
+⚡ Minikube driver comparison: Docker vs KVM2
+
+| Feature                  | Docker Driver                      | KVM2 Driver                         |
+|:--------------------------|:-----------------------------------|:------------------------------------|
+| **Startup Speed**         | Super fast (few seconds)           | Slower (VM boot takes ~30–60 sec)   |
+| **Resource Isolation**    | Poor (shares host kernel)          | Excellent (full OS isolation)       |
+| **Performance (CPU/Memory)** | Slower under heavy load         | Much faster (native VM performance) |
+| **Nested Virtualization** | No real isolation                  | Full isolation                      |
+| **Networking**            | Depends on Docker bridge           | Real network (via libvirt)           |
+| **Kubernetes Features**   | Some features behave weird         | Full Kubernetes behavior            |
+| **Port mapping (host ↔︎ cluster)** | Easy (automatic)        | Manual sometimes (but reliable)     |
+| **File sharing**          | Easy (`mount` from host)            | Slower (network mounts)             |
+| **Multi-node clusters**   | Harder                             | Easier                              |
