@@ -51,7 +51,7 @@ The lab was implemented in the section [networking/linux-bridge-pihole.md](../ne
 
 ### 👀 **Steps to install Pi-hole:**
 
-1a. docker run command
+**Option 1:** docker run command
 ```sh
 docker run -d \
   --name svc.pihole \
@@ -67,11 +67,11 @@ docker run -d \
   -e DHCP_LEASETIME="24h" \
   -e PIHOLE_INTERFACE="br-homelan" \
   --cap-add=NET_ADMIN \
-  -v "$(pwd)/etc-pihole:/etc/pihole" \
-  -v "$(pwd)/etc-dnsmasq.d:/etc/dnsmasq.d" \
+  -v "./etc-pihole:/etc/pihole" \
+  -v "./etc-dnsmasq.d:/etc/dnsmasq.d" \
   --restart unless-stopped \
   pihole/pihole:latest
 ```
 
-1b. [docker-compose](docker-compose.png) file
+**Option 2:** [docker-compose](docker-compose.yml) file
 

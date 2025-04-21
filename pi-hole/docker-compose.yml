@@ -3,7 +3,7 @@ services:
   pihole:
     image: pihole/pihole:latest
     container_name: svc.pi-hole
-    hostname: pi-hole.local-lab.site
+    hostname: pi-hole.alejovic-lab.site
     restart: unless-stopped
     networks:
       docker-homelan:
