@@ -62,15 +62,22 @@ Make sure to have the following installed:
  default   active   yes         yes
 ```
 Once we have the network up and running, we can start Minikube with the `kvm2` driver and specify the network to use.
-Use the `--libvirt-network` flag to specify the custom libvirt network
+Use the `--kvm-network` flag to specify the custom libvirt network
 ```shell
-minikube start --driver=kvm2 --libvirt-network=default
+minikube start --driver=kvm2 --kvm-network=default
 ```
 
 You can also customize the vCPU, RAM, and other parameters for Minikube:
 ```shell
-minikube start --driver=kvm2 --libvirt-network=default --cpus=2 --memory=4096
+minikube start --driver=kvm2 --kvm-network=br-homelan --cpus=2 --memory=4096
 ```
+Workaround for the `--kvm-network` flag:'
+```shell
+minikube start --driver=kvm2 --kvm-network=br-homelan
+
+# docker network
+minikube start --driver=docker --network docker-homelan --static-ip=192.168.8.10
+````
 
 What if you want to use a different network? You can create a new network in libvirt and specify it when starting Minikube:
 ```shell
@@ -78,7 +85,7 @@ virsh net-define /etc/libvirt/qemu/networks/net-homelan.xml
 virsh net-startnet-homelan
 virsh net-autostart net-homelan
 ```
-The XML (/etc/libvirt/qemu/networks/net-homelank.xml) might look like this:
+The XML (/etc/libvirt/qemu/networks/net-homelan.xml) might look like this:
 ```xml
 <network>
   <name>net-homelan</name>
@@ -92,7 +99,7 @@ The XML (/etc/libvirt/qemu/networks/net-homelank.xml) might look like this:
 ```
 Then, start minikube
 ```ssh
-minikube start --driver=kvm2 --libvirt-network=net-homelan
+minikube start --driver=kvm2 --kvm-network=net-homelan
 minikube ssh
 ip addr show
 ```
