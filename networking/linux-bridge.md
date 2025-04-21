@@ -15,7 +15,7 @@ A Linux bridge (like one created with brctl or ip link add type bridge) is a ver
 
 **Expected**
 
-Everyone is on the same bridge → Same subnet (like 192.168.1.0/24) → Full communication ✅
+Everyone is on the same bridge → Same subnet (like 192.168.8.0/24) → Full communication ✅
 ```
 [ Host Machine ]
     |
@@ -67,7 +67,7 @@ sudo nmcli connection add type bridge ifname br-homelan con-name br-homelan
 sudo nmcli connection add type bridge-slave ifname wlan0 master br-homelan
 
 # Configure bridge IP
-sudo nmcli connection modify br-homelan ipv4.addresses 192.168.1.1/24
+sudo nmcli connection modify br-homelan ipv4.addresses 192.168.8.1/24
 sudo nmcli connection modify br-homelan ipv4.method manual
 sudo nmcli connection modify br-homelan ipv6.method ignore
 
@@ -85,13 +85,13 @@ sudo pacman -Syu bridge-utils dnsmasq iptables-nft
 sudo ip link add name br-homelan type bridge
 
 # Assign an IP to the bridge (new subnet, example 192.168.100.1/24)
-sudo ip addr add 192.168.1.1/24 dev br-homelan
+sudo ip addr add 192.168.8.1/24 dev br-homelan
 
 # Bring up the bridge
 sudo ip link set br-homelan up
 
 # ip link add is not persistent across reboots by default.
-sudo nmcli connection modify br-homelan ipv4.addresses 192.168.1.1/24
+sudo nmcli connection modify br-homelan ipv4.addresses 192.168.8.1/24
 sudo nmcli connection modify br-homelan connection.autoconnect yes
 sudo nmcli connection modify br-homelan ipv4.method manual
 sudo nmcli connection modify br-homelan ipv6.method ignore
@@ -156,7 +156,7 @@ In the VM (Linux guest), edit /etc/resolv.conf:
 sudo nano /etc/resolv.conf
 
 Add:
-nameserver 192.168.1.1
+nameserver 192.168.8.1
 nameserver 8.8.8.8
 nameserver 1.1.1.1
 ```
@@ -170,14 +170,14 @@ interface=br-homelan
 
 ## Don't bind only to interface (optional but good for docker, VMs)
 bind-interfaces
-dhcp-range=192.168.1.200,192.168.1.250,12h
+dhcp-range=192.168.8.200,192.168.8.250,12h
 
-## Give 192.168.1.1 as gateway and DNS to clients
+## Give 192.168.8.1 as gateway and DNS to clients
 # Gateway
-dhcp-option=3,192.168.1.1
+dhcp-option=3,192.168.8.1
 
 # DNS Server
-dhcp-option=6,192.168.1.1
+dhcp-option=6,192.168.8.1
 
 ## Forward unknown DNS requests to Google (8.8.8.8) and Cloudflare (1.1.1.1)
 # Upstream DNS servers
@@ -209,33 +209,36 @@ sudo grep -v -e "^#" -e "^$" /etc/dnsmasq.conf
 
 ```sh
 docker network create -d ipvlan \
-    --subnet=192.168.1.0/24 \
-    --gateway=192.168.1.1 \
+    --subnet=192.168.8.0/24 \
+    --gateway=192.168.8.1 \
     -o parent=br-homelan \
     docker-homelan
 ```
 
-
+```sh
 docker network create -d macvlan \
-  --subnet=192.168.1.0/24 \
-  --gateway=192.168.1.254 \
+  --subnet=192.168.8.0/24 \
+  --gateway=192.168.8.254 \
   -o parent=br-homelan docker-homelan
-
+```
+### **Step 4: Create a macvlan interface on the host**
+```sh
 sudo ip link add mac-homelan link br-homelan type macvlan mode bridge
-# Bring it up
-sudo ip addr add 192.168.1.254/24 dev mac-homelan
+  
+  # Bring it up
+sudo ip addr add 192.168.8.254/24 dev mac-homelan
 sudo ip link set mac-homelan up
-
-
+````
+### **Step 5: Create a dummy interface**
 ```
 docker run  \
 --name alpine-test --hostname alpine-test \
---network docker-homelan --ip 192.168.1.201 --dns 192.168.1.254 \
+--network docker-homelan --ip 192.168.8.201 --dns 192.168.8.254 \
 -it alpine sh
 ```
 
 🔥 Trooubleshooting
-- VM (192.168.1.100) ↔ Container (works ✅)
+- VM (192.168.8.100) ↔ Container (works ✅)
 - Container ↔ Host (broken ❌)
 Linux kernel blocks communication between container and parent host (security reason).
 
@@ -243,22 +246,22 @@ Linux kernel blocks communication between container and parent host (security re
 sudo sysctl -w net.ipv4.conf.docker-d0.proxy_arp=1
 sudo sysctl -w net.ipv4.conf.br-homelan.proxy_arp=1
 
-nmcli connection add type dummy ifname docker-d0 ip4 192.168.1.254/24
+nmcli connection add type dummy ifname docker-d0 ip4 192.168.8.254/24
 nmcli connection up dummy-docker
 ```
 
 
 ```
-[ Host 192.168.1.1 ]
+[ Host 192.168.8.1 ]
     |-- dnsmasq; (DNS)
     |-- bridge-slave (NAT) <--- attached to wlan0
       |-- br-homelan (bridge) <--- All attached here
         |
-        |-- [VM1 192.168.1.10] (virt-manager, bridged to br-homelan)
-        |-- [VM2 192.168.1.201]  (virt-manager, bridged to br-homelan)
-        |-- [VM2 192.168.1.202]  (virtualbox, bridged to br-homelan)      
-        |-- [Container1 192.168.1.20] (Docker with ipvlan on br-homelan)
-        |-- [Container2 192.168.1.21] .. portainer...
+        |-- [VM1 192.168.8.10] (virt-manager, bridged to br-homelan)
+        |-- [VM2 192.168.8.201]  (virt-manager, bridged to br-homelan)
+        |-- [VM2 192.168.8.202]  (virtualbox, bridged to br-homelan)      
+        |-- [Container1 192.168.8.20] (Docker with ipvlan on br-homelan)
+        |-- [Container2 192.168.8.21] .. portainer...
 ```
 
 ```
@@ -269,17 +272,17 @@ nmcli connection up dummy-docker
                    ( NAT / MASQUERADE )
                             |
                    [ Host - Arch Linux ]
-                        192.168.1.1
+                        192.168.8.1
                             |
                       [ br-homelan ]
          -------------------------------------------------
         |             |               |                |
  [VM1 - virt-manager] [VM2 - virt-manager] [VM3 - VirtualBox] [Docker Containers]
-  192.168.1.10         192.168.1.201       192.168.1.202  
+  192.168.8.10         192.168.8.201       192.168.8.202  
                                                 |                 
                          ------------------------------------------
                         |                                          |
              [Container1 - nginx]                        [Container2 - Portainer]
-               192.168.1.20                                192.168.1.21
+               192.168.8.20                                192.168.8.21
 
 ```

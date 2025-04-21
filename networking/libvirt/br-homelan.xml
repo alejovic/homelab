@@ -1,0 +1,5 @@
+<network>
+    <name>br-homelan</name>
+    <forward mode='bridge'/>
+    <bridge name='br-homelan'/>
+</network>

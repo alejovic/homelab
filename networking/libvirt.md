@@ -1,6 +1,6 @@
 # Networking - Homelab
 
-### 🔥 Best Choice for Homelab
+### 🔥 Best Choice for Homelab (easy to use)
 
 Why?
 - Ease of use for VM
