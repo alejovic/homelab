@@ -1,0 +1,19 @@
+---
+services:
+  portainer:
+    container_name: svc.portainer
+    hostname: portainer.local-lab.site
+    image: portainer/portainer-ce:lts
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    networks:
+      docker-homelan:
+        ipv4_address: 192.168.8.3
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./portainer_data:/data
+
+networks:
+  docker-homelan:
+    external: true
