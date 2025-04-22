@@ -3,7 +3,7 @@ services:
   pihole:
     image: pihole/pihole:latest
     container_name: svc.pi-hole
-    hostname: pi-hole.alejovic-lab.site
+    hostname: pi-hole.local-lab.site
     restart: unless-stopped
     networks:
       docker-homelan:
@@ -11,20 +11,21 @@ services:
     environment:
       TZ: "Australia/Melbourne"
       WEBPASSWORD: "your_secure_password"
-#      DHCP_ACTIVE: "true"
-#      DHCP_START: "192.168.8.100"
-#      DHCP_END: "192.168.8.200"
-#      DHCP_ROUTER: "192.168.8.1"
-#      DHCP_LEASETIME: "24h"
-#      PIHOLE_INTERFACE: "br-homelan"
+      DHCP_ACTIVE: "true"
+      DHCP_START: "192.168.8.100"
+      DHCP_END: "192.168.8.200"
+      DHCP_ROUTER: "192.168.8.1"
+      DHCP_LEASETIME: "24h"
+      PIHOLE_INTERFACE: "br-homelan"
     volumes:
       - ./etc-pihole:/etc/pihole
       - ./etc-dnsmasq.d:/etc/dnsmasq.d
     cap_add:
         - NET_ADMIN
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
+      - "53:53/tcp" # DNS
+      - "53:53/udp" # DNS
+      - "67:67/udp" # DHCP
       - "80:80"
       - "443:443"
 

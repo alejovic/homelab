@@ -58,6 +58,11 @@ docker run -d \
   --hostname pihole.local-lab.site \
   --network docker-homelan \
   --ip 192.168.8.2 \
+    -p 53:53/tcp \
+    -p 53:53/udp \
+    -p 80:80 \
+    -p 443:443 \
+    -p 67:67/udp \
   -e TZ="Australia/Melbourne" \
   -e WEBPASSWORD="yourpassword" \
   -e DHCP_ACTIVE="true" \
