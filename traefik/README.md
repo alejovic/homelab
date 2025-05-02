@@ -1,11 +1,9 @@
 # Traefik - Homelab
 
-https://www.youtube.com/watch?v=n1vOfdz5Nm8&t=2074s&ab_channel=TechnoTim
-
-
-
-
 ### 🔥 Best Choice for Homelab
+
+Traefik is an excellent choice for a homelab reverse proxy. It simplifies routing and load balancing for your Docker containers and VMs, making it easy to manage multiple services with minimal configuration.
+
 | Feature                                        | Why It’s Good for Homelabs                                                   |
 | ---------------------------------------------- | ---------------------------------------------------------------------------- |
 | 🔄 **Auto Service Discovery**                  | No need to manually define routes—just add labels to containers.             |
@@ -74,12 +72,13 @@ Homelab Components:
 ```
 traefik/
 ├── docker-compose.yml
-├── cf_api_token.txt
+├── .env
 ├── resources/
 │   └── traefik.yml
 │   └── acme.json
+│   └── cf_api_token.txt
 │   └── auth/
-│       └── .env
+│       └── httpasswd
 ```
    - Create a `docker-compose.yml` file in the `traefik` directory.
    - Create a `traefik.yml` file in the `resources` directory.
