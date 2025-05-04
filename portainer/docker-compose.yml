@@ -1,32 +1,30 @@
 ---
 services:
   portainer:
-    container_name: svc.portainer
-    hostname: portainer.local-lab.site
     image: portainer/portainer-ce:lts
+    container_name: svc.portainer
+    hostname: docker.portainer
     restart: unless-stopped
     ports:
-      - "9000:9000"
+      - "18081:9000"
+      - "18444:9443"
     networks:
       docker-homelan:
-        ipv4_address: 192.168.8.3
+        ipv4_address: 192.168.8.4
+    dns:
+      - 192.168.8.1
+    env_file: .env # use .env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./etc-portainer:/data
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.portainer.rule=Host(`portainer.local.local-lab.sites`)" #CNAME
-      - "traefik.http.services.portainer.loadbalancer.server.port=90000"
-      - "traefik.http.routers.portainer.entrypoints=web"
-      - "traefik.http.routers.portainer.middlewares=auth"
-    # add Basic Auth middleware for securing your portainer dashboards behind Traefik.
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.http.routers.portainer.rule=Host(`portainer.local.local-lab.sites`)" #CNAME
-#      - "traefik.http.routers.portainer.entrypoints=websecure"
-#      - "traefik.http.routers.portainer.tls.certresolver=cloudflare"
-#      - "traefik.http.routers.portainer.middlewares=auth"
-#      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer-secure.rule=Host(`portainer.local.${DOMAIN}`)" #CNAME
+      - "traefik.http.routers.portainer-secure.entrypoints=https"
+      - "traefik.http.routers.portainer-secure.tls=true"
+      - "traefik.http.routers.portainer-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+
 networks:
   docker-homelan:
     external: true

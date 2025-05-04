@@ -3,45 +3,36 @@ services:
   pihole:
     image: pihole/pihole:latest
     container_name: svc.pi-hole
-    hostname: pi-hole.local-lab.site
+    hostname: docker.pi-hole
     restart: unless-stopped
     ports:
       - "53:53/tcp" # DNS
       - "53:53/udp" # DNS
       - "67:67/udp" # DHCP
-      - "80:80"
-      - "443:443"
+      - "18080:80"
+      - "18443:443"
     networks:
       docker-homelan:
         ipv4_address: 192.168.8.2
+#    dns:
+#      - 192.168.8.1
     environment:
-      TZ: "Australia/Melbourne"
-      WEBPASSWORD: "your_secure_password"
-      DHCP_ACTIVE: "true"
-      DHCP_START: "192.168.8.100"
-      DHCP_END: "192.168.8.200"
-      DHCP_ROUTER: "192.168.8.1"
-      DHCP_LEASETIME: "24h"
-      PIHOLE_INTERFACE: "br-homelan"
+      TZ: ${PIHOLE_TZ}
+      WEBPASSWORD: ${PIHOLE_WEBPASSWORD}
+    env_file: .env # use .env
     volumes:
       - ./etc-pihole:/etc/pihole
       - ./etc-dnsmasq.d:/etc/dnsmasq.d
     cap_add:
-        - NET_ADMIN
+      - NET_ADMIN
+      - SYS_TIME
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.pihole.rule=Host(`pihole.local.local-lab.sites`)" #CNAME
+      - "traefik.http.routers.pihole-secure.rule=Host(`pihole.local.${DOMAIN}`)" #CNAME
+      - "traefik.http.routers.pihole-secure.entrypoints=https"
+      - "traefik.http.routers.pihole-secure.tls=true"
+      - "traefik.http.routers.pihole-secure.tls.certresolver=letsencrypt"
       - "traefik.http.services.pihole.loadbalancer.server.port=80"
-      - "traefik.http.routers.pihole.entrypoints=web"
-      - "traefik.http.routers.pihole.middlewares=auth"
-    # add Basic Auth middleware for securing your Pi-hole dashboards behind Traefik.
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.http.routers.pihole.rule=Host(`pihole.local.local-lab.sites`)"
-#      - "traefik.http.routers.pihole.entrypoints=websecure"
-#      - "traefik.http.routers.pihole.tls.certresolver=cloudflare"
-#      - "traefik.http.routers.pihole.middlewares=auth"
-#      - "traefik.http.services.pihole.loadbalancer.server.port=80"
 
 networks:
   docker-homelan:
