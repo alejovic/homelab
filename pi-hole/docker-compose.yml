@@ -5,6 +5,12 @@ services:
     container_name: svc.pi-hole
     hostname: pi-hole.local-lab.site
     restart: unless-stopped
+    ports:
+      - "53:53/tcp" # DNS
+      - "53:53/udp" # DNS
+      - "67:67/udp" # DHCP
+      - "80:80"
+      - "443:443"
     networks:
       docker-homelan:
         ipv4_address: 192.168.8.2
@@ -22,12 +28,20 @@ services:
       - ./etc-dnsmasq.d:/etc/dnsmasq.d
     cap_add:
         - NET_ADMIN
-    ports:
-      - "53:53/tcp" # DNS
-      - "53:53/udp" # DNS
-      - "67:67/udp" # DHCP
-      - "80:80"
-      - "443:443"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pihole.rule=Host(`pihole.local.local-lab.sites`)" #CNAME
+      - "traefik.http.services.pihole.loadbalancer.server.port=80"
+      - "traefik.http.routers.pihole.entrypoints=web"
+      - "traefik.http.routers.pihole.middlewares=auth"
+    # add Basic Auth middleware for securing your Pi-hole dashboards behind Traefik.
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.pihole.rule=Host(`pihole.local.local-lab.sites`)"
+#      - "traefik.http.routers.pihole.entrypoints=websecure"
+#      - "traefik.http.routers.pihole.tls.certresolver=cloudflare"
+#      - "traefik.http.routers.pihole.middlewares=auth"
+#      - "traefik.http.services.pihole.loadbalancer.server.port=80"
 
 networks:
   docker-homelan:

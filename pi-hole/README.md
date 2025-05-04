@@ -80,3 +80,15 @@ docker run -d \
 
 **Option 2:** [docker-compose](docker-compose.yml) file
 
+## Add traefik labels
+
+To enable Traefik to route traffic to the Pi-hole container, you need to add the following labels to the `pihole` service in your `docker-compose.yml` file. This will allow Traefik to handle incoming requests and direct them to the Pi-hole service.
+
+```yaml
+  labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.pihole.rule=Host(`pihole.local.local-lab.sites`)" #CNAME
+    - "traefik.http.services.pihole.loadbalancer.server.port=80"
+    - "traefik.http.routers.pihole.entrypoints=web"
+    - "traefik.http.routers.pihole.middlewares=auth"
+```

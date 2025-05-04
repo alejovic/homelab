@@ -37,3 +37,16 @@ docker run -d \
 ```
 
 **Option 2:** [docker-compose](docker-compose.yml) file
+
+## Add traefik labels
+
+To enable Traefik to route traffic to the Portainer container, you need to add the following labels to the `docker-compose.yml` file:
+
+```yaml
+  labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.portainer.rule=Host(`portainer.local.local-lab.sites`)" #CNAME
+    - "traefik.http.services.portainer.loadbalancer.server.port=90000"
+    - "traefik.http.routers.portainer.entrypoints=web"
+    - "traefik.http.routers.portainer.middlewares=auth"
+```
