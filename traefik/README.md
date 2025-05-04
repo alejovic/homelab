@@ -105,3 +105,23 @@ labels:
     - "traefik.http.routers.pihole.entrypoints=web"
     - "traefik.http.routers.pihole.middlewares=auth"
 ```
+
+## **Step 4: IP Whitelisting**
+
+Update Traefik Labels to Use IP Whitelisting Middleware
+```yaml
+labels:
+    - "traefik.http.middlewares.lanonly.ipwhitelist.sourcerange=192.168.8.0/24"
+```
+Apply Middleware to Routers
+
+Example for Pi-hole:
+```yaml
+labels:
+  - "traefik.enable=true"
+  - "traefik.http.routers.pihole.rule=Host(`pihole.${DOMAIN}`)"
+  - "traefik.http.routers.pihole.entrypoints=websecure"
+  - "traefik.http.routers.pihole.tls.certresolver=cloudflare"
+  - "traefik.http.routers.pihole.middlewares=lanonly"
+  - "traefik.http.services.pihole.loadbalancer.server.port=80"
+```
