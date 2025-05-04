@@ -12,7 +12,7 @@ services:
         ipv4_address: 192.168.8.3
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./portainer_data:/data
+      - ./etc-portainer:/data
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.portainer.rule=Host(`portainer.local.local-lab.sites`)" #CNAME
