@@ -20,7 +20,7 @@ providers:
   # file:
   #   filename: /config.yml
 certificatesResolvers:
-  cloudflare:
+  letsencrypt:
     acme:
       email: youremail@email.com
       storage: acme.json

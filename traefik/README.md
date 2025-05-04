@@ -121,7 +121,74 @@ labels:
   - "traefik.enable=true"
   - "traefik.http.routers.pihole.rule=Host(`pihole.${DOMAIN}`)"
   - "traefik.http.routers.pihole.entrypoints=websecure"
-  - "traefik.http.routers.pihole.tls.certresolver=cloudflare"
+  - "traefik.http.routers.pihole.tls.certresolver=letsencrypt"
   - "traefik.http.routers.pihole.middlewares=lanonly"
   - "traefik.http.services.pihole.loadbalancer.server.port=80"
+```
+
+### Troubleshooting
+```yaml
+  # Example service
+  whoami:
+    image: traefik/whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.local.${DOMAIN}`)"
+      - "traefik.http.routers.whoami.entrypoints=https"
+      - "traefik.http.routers.whoami.tls.certresolver=letsencrypt"
+    networks:
+      docker-homelan:
+        ipv4_address: 192.168.8.101
+    dns:
+      - 192.168.8.1
+    depends_on:
+      - traefik
+```
+
+✅ What actually happens:
+You visit https://whoami.local.local-lab.site from a laptop
+1. Laptop asks Pi-hole to resolve it
+2. Pi-hole returns 192.168.8.1
+3. Your laptop makes an HTTPS request to 192.168.8.1
+4. Traefik (listening on host ports) receives it
+5. Traefik routes it to the right Docker container (via Docker's internal network)
+```
+                      ┌────────────────────────────┐
+                      │     Your Laptop / Phone    │
+                      │  Requests:                 │
+                      │  https://whoami.local...   │
+                      └────────────┬───────────────┘
+                                   │ DNS query
+                                   ▼
+                     ┌─────────────────────────────┐
+                     │          Pi-hole            │
+                     │  Resolves:                  │
+                     │  whoami.local.local-lab..   │
+                     │      ➝ 192.168.8.100        │
+                     └────────────┬────────────────┘
+                                  │
+                                  ▼
+               ┌────────────────────────────────────┐
+               │      Browser connects to host:     │
+               │     https://192.168.8.100:443      │
+               └──────────────┬─────────────────────┘
+                              │
+                              ▼
+                    ┌──────────────────────┐
+                    │       Traefik        │
+                    │ Listens on :80/:443  │
+                    │                      │
+                    │ Routes by Hostname:  │
+                    │ whoami.local.loca... │
+                    │      ➝ whoami svc    │
+                    └──────────┬───────────┘
+                               │
+                Docker internal network (e.g., traefik)
+                               │
+                               ▼
+                   ┌──────────────────────┐
+                   │   whoami container   │
+                   │  Exposes port 80     │
+                   └──────────────────────┘
+
 ```
