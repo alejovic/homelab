@@ -28,9 +28,10 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./resources/traefik.yml:/traefik.yml:ro
-      - ./resources/acme.json:/acme.json
-      # - ./data/config.yml:/config.yml:ro
+      - ./etc-traefik/traefik.yml:/traefik.yml:ro
+      - ./etc-traefik/acme.json:/acme.json
+      - ./etc-traefik/log:/var/log/traefik
+#      - ./etc-traefik/config.yml:/config.yml:ro
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.entrypoints=http"
@@ -50,7 +51,7 @@ services:
 
 secrets:
   cf_api_token:
-    file: ./resources/cf_api_token.txt
+    file: etc-traefik/cf_api_token.txt
 
 networks:
   docker-homelan:
