@@ -18,11 +18,17 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.portainer-secure.rule=Host(`homepage.local.${DOMAIN}`)" #CNAME
-      - "traefik.http.routers.portainer-secure.entrypoints=https"
-      - "traefik.http.routers.portainer-secure.tls=true"
-      - "traefik.http.routers.portainer-secure.tls.certresolver=letsencrypt"
-      - "traefik.http.services.portainer.loadbalancer.server.port=3000"
+      - "traefik.http.routers.homepage.entrypoints=http"
+      - "traefik.http.routers.homepage.rule=Host(`homepage.local.${DOMAIN}`)" #CNAME
+      - "traefik.http.routers.homepage.middlewares=default-whitelist@file"
+      - "traefik.http.middlewares.homepage-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.homepage.middlewares=homepage-https-redirect"
+      - "traefik.http.routers.homepage-secure.rule=Host(`homepage.local.${DOMAIN}`)" #CNAME
+      - "traefik.http.routers.homepage-secure.entrypoints=https"
+      - "traefik.http.routers.homepage-secure.tls=true"
+      - "traefik.http.routers.homepage-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.homepage-secure.service=homepage"
+      - "traefik.http.services.homepage.loadbalancer.server.port=3000"
 
 networks:
   docker-homelan:
