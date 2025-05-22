@@ -1,0 +1,29 @@
+---
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: svc.homepage
+    hostname: docker.homepage
+    ports:
+      - 3000:3000
+    networks:
+      docker-homelan:
+        ipv4_address: 192.168.8.5
+    dns:
+      - 192.168.8.1
+    env_file: .env # use .env
+    volumes:
+      - ./etc-homepage:/app/config # Make sure your local config directory exists
+      - /var/run/docker.sock:/var/run/docker.sock:ro # optional, for docker integrations
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer-secure.rule=Host(`homepage.local.${DOMAIN}`)" #CNAME
+      - "traefik.http.routers.portainer-secure.entrypoints=https"
+      - "traefik.http.routers.portainer-secure.tls=true"
+      - "traefik.http.routers.portainer-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.services.portainer.loadbalancer.server.port=3000"
+
+networks:
+  docker-homelan:
+    external: true
